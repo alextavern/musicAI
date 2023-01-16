@@ -96,30 +96,8 @@ if __name__ == "__main__":
 
     # # general parameters
     PATH = "data"
-    # SAMPLE_RATE = 44100  # targeted sample for all files
-    # NUM_OF_SAMPLES = 44100  # targeted number of sample of each file
-    #
-    # # parameters for feature extraction (melspectrograms and mfcc)
-    # N_FFT = 1024
-    # HOP_LENGTH = 512
-    # N_MELS = 64
-    # N_MFCC = 13
-    #
-    # dataset = UrbanSoundPrep(PATH)
-    # df = dataset.metadata
-    # labels = dataset.class_mapping
-    #
-    # sample_idx = 10
-    # for lbl in labels.keys():
-    #     index = df.index[df['class'] == lbl].tolist()
-    #     wave, sr, lbl = dataset.__getitem__(index[sample_idx])
-    #     print(wave)
-        # mel_spectro = dataset.calc_mel_spec(waveform)
-        # mfcc = dataset.calc_mfcc(waveform)
 
-        # dataset.plot_spectrogram(mfcc[0])
-        # plt.show()
-    sample_rate = 22050
+    sr = 22050
 
     n_fft = 1024
     win_length = None
@@ -127,7 +105,7 @@ if __name__ == "__main__":
     n_mels = 64
 
     mel_spectrogram = T.MelSpectrogram(
-        sample_rate=sample_rate,
+        sample_rate=sr,
         n_fft=n_fft,
         win_length=win_length,
         hop_length=hop_length,
@@ -140,7 +118,11 @@ if __name__ == "__main__":
         mel_scale="htk",
     )
 
-    dataset_melspecs = UrbanSoundPrep(PATH, preprocess=True, transform=mel_spectrogram, resample_rate=22050, number_of_samples=22050)
+    dataset_melspecs = UrbanSoundPrep(PATH,
+                                      preprocess=True,
+                                      transform=mel_spectrogram,
+                                      resample_rate=22050,
+                                      number_of_samples=22050)
 
     train = DataLoader(dataset_melspecs, batch_size=64)
     print(train.dataset)
