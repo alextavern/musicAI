@@ -61,7 +61,7 @@ class ESC10Prep:
         if self.transform:
             waveform = self.transform(waveform)
 
-        return waveform, label
+        return waveform, sample_rate, label
 
     def _get_file_list(self):
         items = []
