@@ -10,12 +10,26 @@ import librosa
 
 class UrbanSoundPrep:
 
-    def __init__(self, data_path, preprocess=False, transform=None, resample_rate=22050, number_of_samples=22050):
+    def __init__(self,
+                 data_path,
+                 fold,
+                 train=True,
+                 preprocess=False,
+                 transform=None,
+                 resample_rate=22050,
+                 number_of_samples=22050):
 
         # Constructor
         self.data_path = data_path
         metadata_path = os.path.join(self.data_path, "metadata/UrbanSound8K.csv")
-        self.metadata = pd.read_csv(metadata_path)
+        self.fold = fold
+        metadata_all = pd.read_csv(metadata_path)
+
+        # split to train and val datasets according to folds
+        if train:
+            self.metadata = metadata_all[metadata_all['fold'] != fold]
+        else:
+            self.metadata = metadata_all[metadata_all['fold'] == fold]
 
         self.preprocess = preprocess
         self.transform = transform
@@ -119,10 +133,13 @@ if __name__ == "__main__":
     )
 
     dataset_melspecs = UrbanSoundPrep(PATH,
-                                      preprocess=True,
-                                      transform=mel_spectrogram,
+                                      fold=2,
+                                      train=True,
+                                      preprocess=False,
+                                      transform=None,
                                       resample_rate=22050,
                                       number_of_samples=22050)
 
-    train = DataLoader(dataset_melspecs, batch_size=64)
-    print(train.dataset)
+    # train = DataLoader(dataset_melspecs, batch_size=64)
+    # print(train.dataset)
+    print(dataset_melspecs[0])
