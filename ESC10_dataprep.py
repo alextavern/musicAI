@@ -13,7 +13,7 @@ class ESC10Prep:
     def __init__(self, data_path, preprocess=False, transform=None, resample_rate=22050, number_of_samples=22050):
 
         # Constructor
-        self.data_path = data_path
+        self.data_path = os.path.join(data_path, 'audio')
 
         self.preprocess = preprocess
         self.transform = transform
