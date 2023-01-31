@@ -20,16 +20,16 @@ class ESC10Prep:
         self.resample_rate = resample_rate
         self.number_of_samples = number_of_samples
 
-        self.class_mapping = {"Dog Bark": 0,
+        self.class_mapping = {"Dog bark": 0,
                               "Rain": 1,
-                              "Sea Waves": 2,
+                              "Sea waves": 2,
                               "Baby cry": 3,
                               "Clock tick": 4,
                               "Person sneeze": 5,
                               "Helicopter": 6,
                               "Chainsaw": 7,
                               "Rooster": 8,
-                              "Fire Cracking": 9
+                              "Fire cracking": 9
                               }
 
     def __len__(self):
@@ -109,6 +109,8 @@ if __name__ == "__main__":
     # N_MFCC = 13
     #
     dataset = ESC10Prep(PATH)
+    print(dataset[0])
+
     # df = dataset.
     labels = dataset.class_mapping
     #
