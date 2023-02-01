@@ -1,7 +1,12 @@
-import time
+from time import time
 import numpy as np
 from tqdm import tqdm
 import torch
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sn
 
 def train(model, loss_fun, optimiser, device, epochs, train_data_loader, val_data_loader=None):
     start_training_time = time()
@@ -31,7 +36,7 @@ def train(model, loss_fun, optimiser, device, epochs, train_data_loader, val_dat
             running_losses.append(loss.item())
 
         # TRAINING ACCURACY
-        train_accuracy = calc_accuracy(model, train_data_loader)
+        train_accuracy = calc_accuracy(model, train_data_loader, device)
         train_accuracies.append(train_accuracy)
 
         train_losses.append(np.mean(running_losses))
@@ -89,7 +94,7 @@ def predict(model, input, target, labels):
 
     with torch.no_grad():
         predictions = model(input)  # a tensor object (1, 10)
-        predicted_index = predictions[0].argmax(0)
+        predicted_index = predictions[0].argmax(0).cpu().numpy()
         predicted = labels[predicted_index]
         expected = labels[target]
 
@@ -108,3 +113,30 @@ def calc_accuracy(model, data_loader, device):
             total_correct += correct_predictions
             total_instances += len(inputs)
     return (round(total_correct / total_instances, 3))
+
+def confusion_matrix_and_report(model, device, dataset, labels):
+  y_pred = []
+  y_true = []
+
+  # inputs, _, targets = next(iter(dataloader_val))
+
+  for input, _, target in dataset:
+    input = input.to(device)
+    # target = target.to(device)
+    predicted, expected = predict(model, input, target, labels)
+    y_pred.append(predicted)
+    y_true.append(expected)
+
+  cf_matrix = confusion_matrix(y_true, y_pred)
+  df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *10, index = [i for i in labels],
+                      columns = [i for i in labels])
+  plt.figure(figsize = (12,7))
+  sn.heatmap(df_cm,
+            annot=True,
+            square=True,
+            xticklabels=labels,
+            yticklabels=labels,
+            cmap=plt.cm.Blues,
+            cbar=False)
+
+  print(classification_report(y_true, y_pred, target_names=labels))
