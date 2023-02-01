@@ -10,13 +10,13 @@ import librosa
 
 class ESC10Prep:
 
-    def __init__(self, data_path, preprocess=False, transform=None, resample_rate=22050, number_of_samples=22050):
+    def __init__(self, data_path, device, preprocess=False, transform=None, resample_rate=22050, number_of_samples=22050):
 
         # Constructor
         self.data_path = os.path.join(data_path, 'audio')
-
+        self.device = device
         self.preprocess = preprocess
-        self.transform = transform
+        self.transform = transform.to(self.device)
         self.resample_rate = resample_rate
         self.number_of_samples = number_of_samples
 
@@ -39,6 +39,7 @@ class ESC10Prep:
         items = self._get_file_list()
         filename, label = items[idx]
         waveform, sample_rate = torchaudio.load(filename)
+        waveform = waveform.to(self.device)
 
         # preprocess if necessary
         if self.preprocess:
@@ -94,11 +95,26 @@ class ESC10Prep:
         signal = torch.nn.functional.pad(signal, (0, num_of_missing_samples))
         return signal
 
+class ESC50prep(ESC10Prep):
+    def __init__(self):
+        super().__init__()
+
+        self.class_mapping = {"Dog Bark": 0,
+                              "Rain": 1,
+                              "Sea Waves": 2,
+                              "Baby cry": 3,
+                              "Clock tick": 4,
+                              "Person sneeze": 5,
+                              "Helicopter": 6,
+                              "Chainsaw": 7,
+                              "Rooster": 8,
+                              "Fire Cracking": 9
+                              }
 
 if __name__ == "__main__":
 
     # # general parameters
-    PATH = "data/ESC-10"
+    PATH = "data/ESC-50"
     # SAMPLE_RATE = 44100  # targeted sample for all files
     # NUM_OF_SAMPLES = 44100  # targeted number of sample of each file
     #
@@ -108,9 +124,10 @@ if __name__ == "__main__":
     # N_MELS = 64
     # N_MFCC = 13
     #
-    dataset = ESC10Prep(PATH)
+    dataset = ESC50Prep(PATH)
     # df = dataset.
     labels = dataset.class_mapping
+    print(labels)
     #
     # sample_idx = 10
     # for lbl in labels.keys():
