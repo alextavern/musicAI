@@ -23,7 +23,7 @@ def plot_histories(histories, title, epochs):
         # ax2.legend()
         fig.suptitle("ESC10: MLP w mels (base) - " + title)
 
-    plt.savefig("ESC10_MLP-mels-base_" + title + ".png")
+    # plt.savefig("ESC10_MLP-mels-base_" + title + ".png")
 
 
 def plot_history(histories, experiment, epochs):
@@ -47,21 +47,21 @@ def plot_history(histories, experiment, epochs):
     ax2.legend()
     fig.suptitle("ESC10: MLP w mels (base) - " + str(experiment))
 
-    plt.savefig("ESC10_MLP-mels-base_" + str(experiment) + ".png")
+    # plt.savefig("ESC10_MLP-mels-base_" + str(experiment) + ".png")
 
-    class Scaler(object):
-        """ a simple minmax rescaler between 0 and 1
-        """
+class Scaler(object):
+    """ a simple minmax rescaler between 0 and 1
+    """
 
-        def __init__(self):
-            pass
+    def __init__(self):
+        pass
 
-        def __call__(self, sample):
-            _input = sample
+    def __call__(self, sample):
+        _input = sample
 
-            min, max = _input.min(), _input.max()
-            new_min, new_max = 0, 1
+        min, max = _input.min(), _input.max()
+        new_min, new_max = 0, 1
 
-            _input = (_input - min) / (max - min) * (new_max - new_min) + new_min
+        _input = (_input - min) / (max - min) * (new_max - new_min) + new_min
 
-            return _input
+        return _input

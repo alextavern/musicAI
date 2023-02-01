@@ -3,13 +3,15 @@ from torch import nn
 
 class MLP1(nn.Module):
 
-    def __init__(self, dropout):
-        self.dropout = dropout
+    def __init__(self, input_shape, dropout, num_classes):
         super().__init__()
+        self.dropout = dropout
+        self.input_shape = input_shape
+        self.num_classes = num_classes
         self.flatten = nn.Flatten()
         self.dense_layers = nn.Sequential(
 
-            nn.Linear(64 * 87, 512),  # be careful of the input shape!
+            nn.Linear(self.input_shape[0] * self.input_shape[1], 512),  # be careful of the input shape!
             nn.ReLU(),
             nn.Dropout(self.dropout),
 
@@ -25,7 +27,7 @@ class MLP1(nn.Module):
             # nn.ReLU(),
             # nn.Dropout(self.dropout),
 
-            nn.Linear(128, 10)
+            nn.Linear(128, num_classes)
         )
         self.softmax = nn.Softmax(dim=1)
 
