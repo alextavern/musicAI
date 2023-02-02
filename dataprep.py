@@ -3,8 +3,6 @@ import os
 import torch
 import torchaudio
 import torchaudio.transforms as T
-import matplotlib.pyplot as plt
-import librosa
 
 
 class ESC10Prep:
@@ -105,7 +103,7 @@ class ESC50Prep(ESC10Prep):
                  number_of_samples=22050):
 
         super().__init__(data_path, device, preprocess, transform, resample_rate,
-                 number_of_samples)
+                         number_of_samples)
 
         self.class_mapping = {"Hand saw": 0,
                               "Fireworks": 1,
@@ -200,6 +198,7 @@ class UrbanSoundDatasetPrep(ESC10Prep):
                               "siren": 8,
                               "street_music": 9
                               }
+
     def __len__(self):
         return len(self.metadata)
 
@@ -240,99 +239,4 @@ class UrbanSoundDatasetPrep(ESC10Prep):
 
 
 if __name__ == "__main__":
-
-    if torch.cuda.is_available():
-        device = "cuda"
-    else:
-        device = "cpu"
-
-    print(device)
-    PATH = "data/ESC-50"
-    dataset = ESC50Prep(PATH, device)
-    print(dataset.class_mapping)
-    length = len(dataset)
-
-    print(dataset[1])
-    #
-    # # parameters for feature extraction (melspectrograms and mfcc)
-    # N_FFT = 1024
-    # HOP_LENGTH = 512
-    # N_MELS = 64
-    # N_MFCC = 13
-    #
-    # print(len(dataset))
-    # print(dataset.class_mapping)
-
-    RESAMPLE_RATE = 22050
-    NUMBER_OF_SAMPLES = 22050
-    #
-    n_fft = 1024
-    win_length = None
-    hop_length = 512
-    n_mels = 64
-
-    mels = T.MelSpectrogram(
-        sample_rate=RESAMPLE_RATE,
-        n_fft=n_fft,
-        win_length=win_length,
-        hop_length=hop_length,
-        center=True,
-        pad_mode="reflect",
-        power=2.0,
-        norm='slaney',
-        onesided=True,
-        n_mels=n_mels,
-        mel_scale="htk",
-    )
-
-    dataset = ESC50Prep(PATH,
-                        device,
-                        preprocess=True,
-                        transform=mels,
-                        resample_rate=RESAMPLE_RATE,
-                        number_of_samples=NUMBER_OF_SAMPLES)
-
-
-    print(dataset[1])
-
-    labels = dataset.class_mapping
-    # length = len(dataset)
-    # print(labels)
-    # print(length)
-    n_rows = int((len(labels.keys()) / 2))
-
-    fig, axs = plt.subplots(nrows=n_rows, ncols=2, figsize=(15, 24))
-    plt.subplots_adjust(hspace=0.6)
-    fig.suptitle("ESC10: melspectograms", y=0.93)
-
-    for idx, ax in zip(range(0, length, 40), axs.ravel()):
-        waveform, sample_rate, label = dataset[idx]
-
-        im = ax.imshow(librosa.power_to_db(waveform[0]), origin="lower", aspect="auto")
-        fig.colorbar(im, ax=ax)
-
-        ax.set_title(label)
-        ax.set_xlabel('frame')
-        ax.set_ylabel('freq_bin')
-
-    # plt.savefig("figures/ESC10-processed_melspecs.png", bbox_inches='tight')
-
-    #
-    # n_rows = int((len(labels.keys()) / 2))
-    #
-    # fig, axs = plt.subplots(nrows=n_rows, ncols=2, figsize=(15, 12))
-    # plt.subplots_adjust(hspace=0.6)
-    # fig.suptitle("ESC10: mfcc", y=0.93)
-    #
-    # for idx, ax in zip(range(0, length, 40), axs.ravel()):
-    #     waveform, sample_rate, label = dataset[idx]
-    #
-    #     im = ax.imshow(librosa.power_to_db(waveform[0].cpu()), origin="lower", aspect="auto")
-    #     fig.colorbar(im, ax=ax)
-    #
-    #     key = [k for k, v in labels.items() if v == label]
-    #     ax.set_title(key)
-    #     ax.set_xlabel('frame')
-    #     ax.set_ylabel('freq_bin')
-    #
-    plt.show()
+    pass
