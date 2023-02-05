@@ -207,6 +207,7 @@ class UrbanSoundDatasetPrep(ESC10Prep):
         filepath = self._get_audio_file_path(idx)
         label = self.metadata.iloc[idx, 6]
         waveform, sample_rate = torchaudio.load(filepath)
+        waveform = waveform.to(self.device)
 
         # preprocess if necessary
         if self.preprocess:
@@ -238,5 +239,90 @@ class UrbanSoundDatasetPrep(ESC10Prep):
         return filepath
 
 
+class GTZAN():
+
+    def __init__(self, data_path, device='cpu', preprocess=False, transform=None, resample_rate=22050,
+                 number_of_samples=22050):
+
+        # Constructor
+        self.data_path = os.path.join(data_path, 'genres_original')
+        self.device = device
+        self.preprocess = preprocess
+        if transform is not None:
+            self.transform = transform.to(self.device)
+        else:
+            self.transform = transform
+        self.resample_rate = resample_rate
+        self.number_of_samples = number_of_samples
+
+        self.class_mapping = {"blues": 0,
+                              "classical": 1,
+                              "country": 2,
+                              "disco": 3,
+                              "hiphop": 4,
+                              "jazz": 5,
+                              "metal": 6,
+                              "pop": 7,
+                              "reggae": 8,
+                              "rock": 9
+                              }
+
+    def __len__(self):
+        return len(self._get_file_list())
+
+    def __getitem__(self, idx):
+        items = self._get_file_list()
+        filename, label = items[idx]
+        waveform, sample_rate = torchaudio.load(filename)
+        waveform = waveform.to(self.device)
+
+        # preprocess if necessary
+        if self.preprocess:
+            # keep only one channel
+            number_of_channels = waveform.shape[0]
+            if number_of_channels > 1:
+                waveform = self._calc_mean_of_channels(waveform)
+            # make sure that signal rate is equal
+            if sample_rate != self.resample_rate:
+                waveform = self._resampling(waveform, self.resample_rate)
+                sample_rate = self.resample_rate
+            # make sure that number of samples is equal either by downsampling or upsampling
+            num_of_samples = waveform.shape[1]
+            if num_of_samples > self.number_of_samples:
+                waveform = self._down_sample(waveform)
+            if num_of_samples < self.number_of_samples:
+                waveform = self._up_sample(waveform)
+
+        # transform if necessary
+        if self.transform:
+            waveform = self.transform(waveform)
+
+        return waveform, sample_rate, self.class_mapping[label]
+
+    def _get_file_list(self):
+        items = []
+        for (dirpath, _, filenames) in os.walk(self.data_path):
+            if dirpath is not self.data_path:
+                # get label
+                label = os.path.basename(dirpath)[6:]
+                # get files
+                for filename in filenames:
+                    filepath = os.path.join(dirpath, filename)
+                    items.append([filepath, label])
+        return items
+
+
 if __name__ == "__main__":
-    pass
+    PATH = '/data/GTZAN/genres_original'
+    device = 'cpu'
+    transform = None
+    train_dataset = GTZAN(PATH,
+                         device,
+                         preprocess=False,
+                         transform=transform,
+                         resample_rate=22050,
+                         number_of_samples=22050)
+
+    print(train_dataset.data_path)
+    print(train_dataset._get_file_list())
+

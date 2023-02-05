@@ -1,8 +1,59 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import librosa
+import torch
 
 
-def plot_histories(histories, title, epochs):
+def plot_waveforms(dataset, title):
+    labels = dataset.class_mapping
+    length = len(dataset)
+    n_rows = int((len(labels.keys()) / 2))
+
+    fig, axs = plt.subplots(nrows=n_rows, ncols=2, figsize=(15, 12))
+    plt.subplots_adjust(hspace=0.6)
+    fig.suptitle(title, y=0.93)
+
+    for lbl, ax in enumerate(axs.ravel()):
+        for idx in range(0, length):
+            _, _, label = dataset[idx]
+            if label == lbl:
+                waveform, sample_rate, _ = dataset[idx]
+                num_channels, num_frames = waveform.shape
+                time_axis = torch.arange(0, num_frames) / sample_rate
+                ax.plot(time_axis, waveform[0])
+                ax.set_title(label)
+                ax.set_xlabel('Time (sec)')
+                ax.set_ylabel('Amplitude (a.u.)')
+                key = [k for k, v in labels.items() if v == label]
+                ax.set_title(key)
+                ax.set_xlabel('frame')
+                ax.set_ylabel('freq_bin')
+                break
+
+def plot_features(dataset, title):
+    labels = dataset.class_mapping
+    length = len(dataset)
+    n_rows = int((len(labels.keys()) / 2))
+
+    fig, axs = plt.subplots(nrows=n_rows, ncols=2, figsize=(15, 12))
+    plt.subplots_adjust(hspace=0.6)
+    fig.suptitle(title, y=0.93)
+
+    for lbl, ax in enumerate(axs.ravel()):
+        for idx in range(0, length):
+            _, _, label = dataset[idx]
+            if label == lbl:
+                waveform, _, _ = dataset[idx]
+                im = ax.imshow(librosa.power_to_db(waveform[0].cpu()), origin="lower", aspect="auto")
+                fig.colorbar(im, ax=ax)
+                key = [k for k, v in labels.items() if v == label]
+                ax.set_title(key)
+                ax.set_xlabel('frame')
+                ax.set_ylabel('freq_bin')
+                break
+
+
+def plot_histories(histories, epochs, title):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
     for experiment in histories:
@@ -21,13 +72,11 @@ def plot_histories(histories, title, epochs):
         ax2.plot(x_axis, val_accuracies, label='validation accuracy:' + str(experiment))
         ax2.set_xlabel("Epoch #")
         ax2.set_ylabel("Accuracy (a.u.)")
-        # ax2.legend()
-        fig.suptitle("ESC10: MLP w mels (base) - " + title)
-
-    # plt.savefig("ESC10_MLP-mels-base_" + title + ".png")
+        ax2.legend()
+        fig.suptitle(title)
 
 
-def plot_history(histories, experiment, epochs):
+def plot_history(histories, experiment, epochs, title):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
     train_losses = histories[experiment][0]
@@ -46,7 +95,7 @@ def plot_history(histories, experiment, epochs):
     ax2.set_xlabel("Epoch #")
     ax2.set_ylabel("Accuracy (a.u.)")
     ax2.legend()
-    fig.suptitle("ESC10: MLP w mels (base) - " + str(experiment))
+    fig.suptitle(title + " - " + str(experiment))
 
     # plt.savefig("ESC10_MLP-mels-base_" + str(experiment) + ".png")
 
